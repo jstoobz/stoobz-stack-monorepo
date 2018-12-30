@@ -9,6 +9,10 @@ module.exports = merge(webpackBaseConfig, {
   optimization: {
     minimizer: [
       new UglifyJsPlugin()
+      // new UglifyJsPlugin({
+      //   sourceMap: false,
+      //   compress: true
+      // })
       // new OptimizeCSSAssetsPlugin()
     ]
   },
