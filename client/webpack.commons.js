@@ -32,53 +32,15 @@ const commonConfig = merge([
           use: ['babel-loader'],
         },
         {
-          test: /\.(gif|jpe?g|png|svg)$/i,
+          test: /\.(png|svg|jpg|gif)$/,
           use: [
             {
               loader: 'file-loader',
               options: {
-                // name: 'static/media/[name].[ext]',
                 name: 'static/media/[name].[hash:8].[ext]',
               },
             },
-            {
-              loader: 'image-webpack-loader',
-              options: {
-                mozjpeg: {
-                  progressive: true,
-                  quality: 65,
-                },
-                optipng: {
-                  enabled: false,
-                },
-                pngquant: {
-                  quality: '65-90',
-                  speed: 4,
-                },
-                gifsicle: {
-                  interlaced: false,
-                },
-                webp: {
-                  quality: 75,
-                },
-              },
-            },
           ],
-          // test: /\.(png|svg|jpe?g|gif)$/,
-          // use: [
-          //   {
-          //     loader: 'file-loader',
-          //     options: {
-          //       // name: 'static/media/[name].[ext]',
-          //       name: 'static/media/[name].[hash:8].[ext]',
-          //     },
-          //     // loader: 'url-loader',
-          //     // options: {
-          //     //   // name: 'static/media/[name].[ext]',
-          //     //   // name: 'static/media/[name].[hash:8].[ext]',
-          //     // },
-          //   },
-          // ],
         },
         {
           test: /\.(woff|woff2|eot|ttf|otf)$/,
@@ -111,6 +73,7 @@ const commonConfig = merge([
         template: PUBLIC_DIR + '/index.html',
         favicon: PUBLIC_DIR + '/favicon.ico',
       }),
+      new webpack.HotModuleReplacementPlugin(),
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       }),
