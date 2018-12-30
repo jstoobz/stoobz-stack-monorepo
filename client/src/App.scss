@@ -6,6 +6,18 @@
 //   background-position: center;
 // }
 
+// @import '~font-awesome/css/font-awesome.css';
+// import 'font-awesome/css/font-awesome.min.css';
+
+// copy over quicksand fonts to public/fonts/
+// @font-face {
+//   font-family: 'Quicksand';
+//   src: url('../public/fonts/quicksand/Quicksand-Bold.ttf') format('truetype');
+//   src: url('../public/fonts/quicksand/Quicksand-Light.ttf') format('truetype');
+//   src: url('../public/fonts/quicksand/Quicksand-Medium.ttf') format('truetype');
+//   src: url('../public/fonts/quicksand/Quicksand-Regular.ttf') format('truetype');
+// }
+
 .test-image img {
   background-color: red;
   width: 50px;
@@ -13,6 +25,7 @@
 }
 
 .App {
+  font-family: 'Quicksand';
   text-align: center;
 }
 

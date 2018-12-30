@@ -4,6 +4,7 @@ const merge = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const GoogleFontsPlugin = require('google-fonts-webpack-plugin')
 
 const parts = require('./webpack.parts')
 
@@ -81,8 +82,13 @@ const commonConfig = merge([
           // ],
         },
         {
-          test: /\.(woff|woff2|eot|ttf|otf)$/,
-          use: ['file-loader'],
+          test: /\.(woff|woff2|eot|ttf|otf)(\?v=\d+\.\d+\.\d+)?$/,
+          use: {
+            loader: 'file-loader',
+            options: {
+              name: 'static/fonts/[name].[ext]',
+            },
+          },
         },
         {
           test: /\.(csv|tsv)$/,
@@ -110,6 +116,18 @@ const commonConfig = merge([
         title: 'stoobz stack',
         template: PUBLIC_DIR + '/index.html',
         favicon: PUBLIC_DIR + '/favicon.ico',
+      }),
+      new GoogleFontsPlugin({
+        name: 'gfonts',
+        filename: 'static/fonts/gfonts.css',
+        formats: ['eot', 'woff', 'woff2', 'ttf', 'svg'],
+        local: true,
+        fonts: [
+          {
+            family: 'Quicksand',
+            variants: ['500', '700'],
+          },
+        ],
       }),
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),

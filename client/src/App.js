@@ -56,7 +56,7 @@ class App extends Component {
         <p>{this.state.response}</p>
         <form onSubmit={this.handleSubmit}>
           <p>
-            <strong>Post to Serverr:</strong>
+            <strong>Post to Server:</strong>
           </p>
           <input
             type="text"
@@ -70,6 +70,9 @@ class App extends Component {
         <div className="test-image">
           <img src={code} />
         </div>
+        <span>
+          Font-Awesome is <i className="fa fa-thumbs-up" />
+        </span>
       </div>
     )
   }
