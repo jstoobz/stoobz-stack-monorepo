@@ -7,10 +7,13 @@ const webpackBaseConfig = require('./webpack.base.config.js')
 
 module.exports = merge(webpackBaseConfig, {
   optimization: {
-    minimizer: [new UglifyJsPlugin()]
+    minimizer: [
+      new UglifyJsPlugin()
+      // new OptimizeCSSAssetsPlugin()
+    ]
   },
   plugins: [
-    new MiniCssExtractPlugin(),
+    // new MiniCssExtractPlugin(),
     new OptimizeCSSAssetsPlugin(),
     new Visualizer({
       filename: './statistics.html'

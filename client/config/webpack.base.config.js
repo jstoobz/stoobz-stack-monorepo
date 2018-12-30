@@ -20,6 +20,7 @@ const isProd = process.env.NODE_ENV !== 'development'
 
 module.exports = {
   // context: __dirname + '../../',
+  context: APP_DIR,
   // mode: isDev ? 'development' : 'production',
   // mode: 'development',
   entry: ['@babel/polyfill', APP_DIR + '/index.js'],
@@ -28,6 +29,7 @@ module.exports = {
     path: BUILD_DIR,
     publicPath: '/',
     filename: 'static/js/[name].[hash:8].js'
+    // filename: 'static/js/[name].[contenthash:8].js'
     // filename: 'static/js/[name].[chunkhash:8].js'
     // filename: !isDev
     //   ? 'static/js/[name].[chunkhash:8].js'
@@ -38,10 +40,17 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.jsx']
-    // extensions: ['.js', '.jsx', '.css', 'scss']
-    // modules: ['node_modules', path.resolve(__dirname, '../src')]
   },
   devtool: 'source-map',
+  // devtool: 'cheap-module-eval-source-map',
+  // devtool: 'inline-source-map',
+  // stats: {
+  //   errors: 'errors-only',
+  //   colors: {
+  //     green: '\u001b[32m'
+  //   }
+
+  // },
   module: {
     rules: [
       {
@@ -52,18 +61,10 @@ module.exports = {
       {
         test: /\.(sa|sc|c)?ss$/,
         use: [
-          // isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
-          // isDev && 'style-loader',
-          // isProd && MiniCssExtractPlugin.loader,
-          'style-loader',
-          // MiniCssExtractPlugin.loader,
-          // PLATFORM === 'production'
-          //   ? MiniCssExtractPlugin.loader
-          //   : 'style-loader',
+          isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
           'css-loader',
           'sass-loader'
         ]
-        // sideEffects: true
       },
       {
         test: /\.(png|svg|jpg|gif)$/,
@@ -77,20 +78,45 @@ module.exports = {
         ]
       },
       {
+        test: /\.(woff|woff2|eot|ttf|otf)$/,
+        use: ['file-loader']
+      },
+      {
+        test: /\.(csv|tsv)$/,
+        use: ['csv-loader']
+      },
+      {
+        test: /\.xml$/,
+        use: ['xml-loader']
+      },
+      {
         test: /\.html$/,
         use: [
           {
-            loader: 'html-loader',
-            options: { minimize: true }
+            loader: 'html-loader'
+            // options: { minimize: true }
           }
         ]
       }
     ]
   },
+  // optimization: {
+  //   runtimeChunk: 'single',
+  //   splitChunks: {
+  //     cacheGroups: {
+  //       vendor: {
+  //         test: /[\\/]node_modules[\\/]/,
+  //         name: 'vendors',
+  //         chunks: 'all'
+  //       }
+  //     }
+  //   }
+  // },
   plugins: [
-    new CleanWebpackPlugin([BUILD_DIR]),
+    new CleanWebpackPlugin([BUILD_DIR], { allowExternal: true }),
     new HtmlWebpackPlugin({
       filename: './index.html',
+      title: 'stoobz stack',
       template: PUBLIC_DIR + '/index.html',
       favicon: PUBLIC_DIR + '/favicon.ico'
       // inject: true //added
@@ -109,6 +135,7 @@ module.exports = {
     //   disable: true
     // }),
     new webpack.HotModuleReplacementPlugin(),
+    // new webpack.HashedModuleIdsPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
       // 'process.env.PLATFORM': JSON.stringify(env.PLATFORM)
@@ -119,18 +146,27 @@ module.exports = {
     // contentBase: PUBLIC_DIR,
     // contentBase: process.cwd(),
     // publicPath: '/',
+    // publicPath: 'http://localhost:8080' // necessary to have full path when using HMR, keep same as output.publicPath
     compress: true,
     // port: PORT,
+    // host: 0.0.0.0
     open: true,
     hot: true,
     // clientLogLevel: 'none',
     historyApiFallback: true,
+    // overlay: true,
+    // clientLogLevel: 'none',
+    // noInfo: true,
     // stats: 'errors-only',
     // TRY ADDING THE BELOW?
     // contentBase: PUBLIC_DIR,
     // watchContentBase: true,
     // publicPath: '/',
     // quiet: true,
+    // proxy: [{
+    //   context: ['/auth', '/api'],
+    //   target: 'http://localhost:5000',
+    // }],
     proxy: {
       '/api/**': 'http://localhost:5000'
     }
