@@ -1,4 +1,5 @@
 const path = require('path')
+const glob = require('glob')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -8,14 +9,11 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const cssnano = require('cssnano')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
+const configPaths = require('./paths')
 const parts = require('./webpack.parts')
-
-const APP_DIR = path.resolve(__dirname, '..', 'src')
-const BUILD_DIR = path.resolve(__dirname, '..', 'dist')
-const PUBLIC_DIR = path.resolve(__dirname, '..', 'public')
-
-const isDev = process.env.NODE_ENV !== 'production'
-const isProd = process.env.NODE_ENV === 'production'
+const APP_DIR = path.resolve(__dirname, '../src')
+const BUILD_DIR = path.resolve(__dirname, '../dist')
+const PUBLIC_DIR = path.resolve(__dirname, '../public')
 
 const commonConfig = merge([
   {
@@ -26,8 +24,8 @@ const commonConfig = merge([
       path: BUILD_DIR,
       publicPath: '/',
       // filename: 'static/js/[name].[hash:8].js',
-      filename: 'static/js/[name].[hash:8].js',
-      // chunkFilename: 'static/js/[name].[hash:8].js',
+      // filename: 'static/js/[name].[chunkhash:8].js',
+      // chunkFilename: 'static/js/[name].[chunkhash:8].js',
     },
     resolve: {
       extensions: ['.js', '.jsx'],
@@ -36,65 +34,11 @@ const commonConfig = merge([
     module: {
       rules: [
         {
-          test: /\.jsx?$/,
-          exclude: /node_modules/,
-          use: ['babel-loader'],
-        },
-        {
-          test: /\.(gif|jpe?g|png|svg)$/i,
-          use: [
-            {
-              loader: 'file-loader',
-              options: {
-                // name: 'static/media/[name].[ext]',
-                name: 'static/media/[name].[hash:8].[ext]',
-              },
-            },
-            {
-              loader: 'image-webpack-loader',
-              options: {
-                mozjpeg: {
-                  progressive: true,
-                  quality: 65,
-                },
-                optipng: {
-                  enabled: false,
-                },
-                pngquant: {
-                  quality: '65-90',
-                  speed: 4,
-                },
-                gifsicle: {
-                  interlaced: false,
-                },
-                webp: {
-                  quality: 75,
-                },
-              },
-            },
-          ],
-          // test: /\.(png|svg|jpe?g|gif)$/,
-          // use: [
-          //   {
-          //     loader: 'file-loader',
-          //     options: {
-          //       // name: 'static/media/[name].[ext]',
-          //       name: 'static/media/[name].[hash:8].[ext]',
-          //     },
-          //     // loader: 'url-loader',
-          //     // options: {
-          //     //   // name: 'static/media/[name].[ext]',
-          //     //   // name: 'static/media/[name].[hash:8].[ext]',
-          //     // },
-          //   },
-          // ],
-        },
-        {
           test: /\.(woff|woff2|eot|ttf|otf)(\?v=\d+\.\d+\.\d+)?$/,
           use: {
             loader: 'file-loader',
             options: {
-              name: 'static/fonts/[name].[ext]',
+              name: 'static/fonts/[name].[hash:8].[ext]',
             },
           },
         },
@@ -118,7 +62,6 @@ const commonConfig = merge([
       ],
     },
     plugins: [
-      new CleanWebpackPlugin([BUILD_DIR], { allowExternal: true }),
       new HtmlWebpackPlugin({
         filename: './index.html',
         title: 'stoobz stack',
@@ -130,6 +73,8 @@ const commonConfig = merge([
       }),
     ],
   },
+  parts.loadJavaScript({ exclude: /node_modules/ }),
+  parts.setFreeVariable('HELLO', 'hello from config'),
 ])
 
 // const commonConfig = merge([
@@ -148,26 +93,14 @@ const commonConfig = merge([
 // ])
 
 const productionConfig = merge([
-  // dev,
-  // parts.clean(PATHS.build),
-  parts.loadCSS(),
-  // parts.minifyJavaScript(),
-  // {
-  //   plugins: [
-  //     new UglifyJsPlugin({
-  //       cache: true,
-  //       parallel: true,
-  //       sourceMap: false,
-  //     }),
-  //     new OptimizeCSSAssetsPlugin({}),
-  //     // new webpack.LoaderOptionsPlugin({
-  //     //   minimize: true,
-  //     // }),
-  //   ],
-  // },
-  // {
-  //   plugins: [new OptimizeCSSAssetsPlugin({ cssProcess: cssnano })],
-  // },
+  {
+    output: {
+      filename: 'static/js/[name].[chunkhash:8].js',
+      chunkFilename: 'static/js/[name].[chunkhash:8].js',
+    },
+  },
+  parts.clean(BUILD_DIR),
+  parts.minifyJavaScript(),
   parts.minifyCSS({
     options: {
       discardComments: {
@@ -176,128 +109,63 @@ const productionConfig = merge([
       safe: true,
     },
   }),
-  // {
-  //   plugins: [
-  //     // new OptimizeCSSAssetsPlugin(),
-  //     new OptimizeCSSAssetsPlugin({
-  //       cssProcessor: cssnano,
-  //       cssProcessorPluginOptions: {
-  //         preset: ['default', { discardComments: { removeAll: true } }],
-  //       },
-  //     }),
-  //   ],
-  // },
-  // parts.minifyCSS({
-  //   options: {
-  //     discardComments: {
-  //       removeAll: true,
-  //     },
-  //   },
-  // }),
-  // {
-  //   // mode: 'production',
-  //   optimization: {
-  //     minimizer: [
-  //       new UglifyJsPlugin({
-  //         cache: true,
-  //         parallel: true,
-  //       }),
-  //       new OptimizeCSSAssetsPlugin(),
-  //     ],
-  //   },
-  //   plugins: [
-  //     new OptimizeCSSAssetsPlugin({
-  //       assetNameRegExp: /\.optimize\.css$/g,
-  //       cssProcessor: cssnano,
-  //       cssProcessorOptions: {
-  //         discardComments: {
-  //           removeAll: true,
-  //         },
-  //       },
-  //       safe: true,
-  //     }),
-  //   ],
-  // },
-  // parts.minifyCSS({
-  //   options: {
-  // discardComments: {
-  //   removeAll: true,
-  // },
-  // safe: true,
-  //   },
-  // }),
-  // {
-  //   optimization: {
-  //     splitChunks: {
-  //       cacheGroups: {
-  //         vendor: {
-  //           test: /[\\/]node_modules[\\/]/,
-  //           name: 'vendor',
-  //           // enforce: true, // added per webpack example
-  //           chunks: 'initial',
-  //         },
-  //         // commons: {
-  //         //   test: /[\\/]node_modules[\\/]/,
-  //         //   name: 'vendor',
-  //         //   chunks: 'initial',
-  //         // },
-  //       },
-  //     },
-  //   },
-  // },
-  // {
-  //   devtool: 'source-map',
-  // },
-  // parts.extractCSS(),
-  // parts.extractCSS({
-  //   // use: ['css-loader', 'postcss-loader', 'sass-loader']
-  //   use: [
-  //     {
-  //       loader: 'css-loader',
-  //       options: {
-  //         importLoaders: 2,
-  //       },
-  //     },
-  //     {
-  //       loader: 'postcss-loader',
-  //       options: {
-  //         plugins: () => [require('autoprefixer')],
-  //       },
-  //     },
-  //     'sass-loader',
-  //   ],
-  // }),
-])
-
-const developmentConfig = merge([
-  // dev,
-  parts.loadCSS(),
-  parts.devServer({
-    // Customize host/port here if needed
-    host: process.env.HOST,
-    port: process.env.PORT,
+  parts.extractCSS({
+    use: [
+      {
+        loader: 'css-loader',
+        options: {
+          importLoaders: 2,
+          // sourceMap: true,
+        },
+      },
+      parts.autoprefix(),
+      'sass-loader',
+    ],
   }),
+  parts.purifyCSS({
+    paths: glob.sync(`${APP_DIR}/**/*.js`, { nodir: true }),
+  }),
+  parts.loadAndCompressImages({
+    options: {
+      limit: 15000,
+      name: 'static/media/[name].[hash:8].[ext]',
+    },
+  }),
+  parts.generateSourceMaps({ type: 'source-map' }),
   {
-    devtool: 'cheap-module-eval-source-map',
+    optimization: {
+      splitChunks: {
+        cacheGroups: {
+          commons: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendor',
+            chunks: 'initial',
+          },
+        },
+      },
+    },
   },
 ])
 
+const developmentConfig = merge([
+  parts.devServer({
+    host: process.env.HOST,
+    port: process.env.PORT,
+  }),
+  parts.loadCSS(),
+  parts.loadImages(),
+  parts.generateSourceMaps({ type: 'cheap-module-eval-source-map' }),
+])
+
 module.exports = mode => {
-  console.log(`
+  // console.log(`
 
-    MODE: ${JSON.stringify(mode)}
-
-  `)
-  //   console.log(`
-
-  //   NODE_ENV for production = ${isProd}
+  //   MODE: ${JSON.stringify(mode)}
 
   // `)
-
   if (mode === 'production') {
-    // works is script uses -p
-    // if (mode.production) { // works if script uses --mode production which creates an object that needs to be accessed
-    // if (isProd) {
+    // console.log('\x1b[36m%s\x1b[0m', 'Building for production ...');
+
     console.log(`MODE: ${JSON.stringify(mode)}`)
 
     return merge(commonConfig, productionConfig, { mode })
