@@ -2,6 +2,21 @@ const path = require('path')
 const webpack = require('webpack')
 const isDev = process.env.NODE_ENV !== 'production'
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const cssnano = require('cssnano')
+const UglifyWebpackPlugin = require('uglifyjs-webpack-plugin')
+
+exports.minifyJavaScript = () => ({
+  optimization: {
+    minimizer: [new UglifyWebpackPlugin({ sourceMap: false })],
+    // minimizer: [new UglifyWebpackPlugin({ sourceMap: true })],
+  },
+})
+
+exports.clean = pathRename => ({
+  plugins: [new CleanWebpackPlugin([pathRename])],
+})
 
 exports.devServer = ({ host, port } = {}) => ({
   devServer: {
@@ -25,6 +40,29 @@ exports.autoprefix = () => ({
   loader: 'postcss-loader',
   options: {
     plugins: () => [require('autoprefixer')()],
+  },
+})
+
+exports.minifyCSS = ({ options }) => ({
+  plugins: [
+    new OptimizeCSSAssetsPlugin({
+      cssProcessor: cssnano,
+      cssProcessorOptions: options,
+      // cssProcessorPluginOptions: options,
+    }),
+  ],
+})
+
+exports.loadJavaScript = ({ include, exclude } = {}) => ({
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        include,
+        exclude,
+        use: 'babel-loader',
+      },
+    ],
   },
 })
 
@@ -66,6 +104,8 @@ exports.loadCSS = ({ include, exclude } = {}) => ({
   plugins: [
     new MiniCssExtractPlugin({
       filename: 'static/css/[name].[contenthash:8].css',
+      chunkFilename: 'static/css/[name].[contenthash:8].css',
+      // chunkFilename: 'static/css/[id].css'
     }),
   ],
 })

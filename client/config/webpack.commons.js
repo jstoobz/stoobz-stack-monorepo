@@ -98,6 +98,7 @@ const commonConfig = merge([
 const productionConfig = merge([
   // dev,
   parts.loadCSS(),
+  parts.minifyCSS(),
   // parts.extractCSS(),
   // parts.extractCSS({
   //   // use: ['css-loader', 'postcss-loader', 'sass-loader']

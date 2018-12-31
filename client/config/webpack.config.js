@@ -4,7 +4,9 @@ const merge = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const GoogleFontsPlugin = require('google-fonts-webpack-plugin')
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const cssnano = require('cssnano')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const parts = require('./webpack.parts')
 
@@ -12,19 +14,25 @@ const APP_DIR = path.resolve(__dirname, '..', 'src')
 const BUILD_DIR = path.resolve(__dirname, '..', 'dist')
 const PUBLIC_DIR = path.resolve(__dirname, '..', 'public')
 
+const isDev = process.env.NODE_ENV !== 'production'
+const isProd = process.env.NODE_ENV === 'production'
+
 const commonConfig = merge([
   {
     context: APP_DIR,
+    // mode: isProd ? 'production' : 'develoment',
     entry: ['@babel/polyfill', APP_DIR + '/index.js'],
     output: {
       path: BUILD_DIR,
       publicPath: '/',
+      // filename: 'static/js/[name].[hash:8].js',
       filename: 'static/js/[name].[hash:8].js',
+      // chunkFilename: 'static/js/[name].[hash:8].js',
     },
     resolve: {
       extensions: ['.js', '.jsx'],
     },
-    devtool: 'source-map',
+    // devtool: 'source-map',
     module: {
       rules: [
         {
@@ -117,18 +125,6 @@ const commonConfig = merge([
         template: PUBLIC_DIR + '/index.html',
         favicon: PUBLIC_DIR + '/favicon.ico',
       }),
-      new GoogleFontsPlugin({
-        name: 'gfonts',
-        filename: 'static/fonts/gfonts.css',
-        formats: ['eot', 'woff', 'woff2', 'ttf', 'svg'],
-        local: true,
-        fonts: [
-          {
-            family: 'Quicksand',
-            variants: ['500', '700'],
-          },
-        ],
-      }),
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       }),
@@ -137,6 +133,7 @@ const commonConfig = merge([
 ])
 
 // const commonConfig = merge([
+// parts.loadJavaScript({ include: PATHS.app }),
 //   {
 //     plugins: [
 //       new HtmlWebpackPlugin({
@@ -152,7 +149,105 @@ const commonConfig = merge([
 
 const productionConfig = merge([
   // dev,
+  // parts.clean(PATHS.build),
   parts.loadCSS(),
+  // parts.minifyJavaScript(),
+  // {
+  //   plugins: [
+  //     new UglifyJsPlugin({
+  //       cache: true,
+  //       parallel: true,
+  //       sourceMap: false,
+  //     }),
+  //     new OptimizeCSSAssetsPlugin({}),
+  //     // new webpack.LoaderOptionsPlugin({
+  //     //   minimize: true,
+  //     // }),
+  //   ],
+  // },
+  // {
+  //   plugins: [new OptimizeCSSAssetsPlugin({ cssProcess: cssnano })],
+  // },
+  parts.minifyCSS({
+    options: {
+      discardComments: {
+        removeAll: true,
+      },
+      safe: true,
+    },
+  }),
+  // {
+  //   plugins: [
+  //     // new OptimizeCSSAssetsPlugin(),
+  //     new OptimizeCSSAssetsPlugin({
+  //       cssProcessor: cssnano,
+  //       cssProcessorPluginOptions: {
+  //         preset: ['default', { discardComments: { removeAll: true } }],
+  //       },
+  //     }),
+  //   ],
+  // },
+  // parts.minifyCSS({
+  //   options: {
+  //     discardComments: {
+  //       removeAll: true,
+  //     },
+  //   },
+  // }),
+  // {
+  //   // mode: 'production',
+  //   optimization: {
+  //     minimizer: [
+  //       new UglifyJsPlugin({
+  //         cache: true,
+  //         parallel: true,
+  //       }),
+  //       new OptimizeCSSAssetsPlugin(),
+  //     ],
+  //   },
+  //   plugins: [
+  //     new OptimizeCSSAssetsPlugin({
+  //       assetNameRegExp: /\.optimize\.css$/g,
+  //       cssProcessor: cssnano,
+  //       cssProcessorOptions: {
+  //         discardComments: {
+  //           removeAll: true,
+  //         },
+  //       },
+  //       safe: true,
+  //     }),
+  //   ],
+  // },
+  // parts.minifyCSS({
+  //   options: {
+  // discardComments: {
+  //   removeAll: true,
+  // },
+  // safe: true,
+  //   },
+  // }),
+  // {
+  //   optimization: {
+  //     splitChunks: {
+  //       cacheGroups: {
+  //         vendor: {
+  //           test: /[\\/]node_modules[\\/]/,
+  //           name: 'vendor',
+  //           // enforce: true, // added per webpack example
+  //           chunks: 'initial',
+  //         },
+  //         // commons: {
+  //         //   test: /[\\/]node_modules[\\/]/,
+  //         //   name: 'vendor',
+  //         //   chunks: 'initial',
+  //         // },
+  //       },
+  //     },
+  //   },
+  // },
+  // {
+  //   devtool: 'source-map',
+  // },
   // parts.extractCSS(),
   // parts.extractCSS({
   //   // use: ['css-loader', 'postcss-loader', 'sass-loader']
@@ -182,15 +277,32 @@ const developmentConfig = merge([
     host: process.env.HOST,
     port: process.env.PORT,
   }),
+  {
+    devtool: 'cheap-module-eval-source-map',
+  },
 ])
 
 module.exports = mode => {
+  console.log(`
+
+    MODE: ${JSON.stringify(mode)}
+
+  `)
+  //   console.log(`
+
+  //   NODE_ENV for production = ${isProd}
+
+  // `)
+
   if (mode === 'production') {
+    // works is script uses -p
+    // if (mode.production) { // works if script uses --mode production which creates an object that needs to be accessed
+    // if (isProd) {
     console.log(`MODE: ${JSON.stringify(mode)}`)
 
     return merge(commonConfig, productionConfig, { mode })
   }
-  console.log(`MODE: ${JSON.stringify(mode)}`)
+  console.log(`MODE_SHOULDBEDEV: ${JSON.stringify(mode)}`)
 
   return merge(commonConfig, developmentConfig, { mode })
 }
