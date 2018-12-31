@@ -18,6 +18,7 @@ const PUBLIC_DIR = path.resolve(__dirname, '../public')
 const commonConfig = merge([
   {
     context: APP_DIR,
+    target: 'web', // defaults as web, CHECK to make sure this is set properly
     // mode: isProd ? 'production' : 'develoment',
     entry: ['@babel/polyfill', APP_DIR + '/index.js'],
     output: {
@@ -101,20 +102,21 @@ const productionConfig = merge([
   },
   parts.clean(BUILD_DIR),
   parts.minifyJavaScript(),
-  parts.minifyCSS({
-    options: {
-      discardComments: {
-        removeAll: true,
-      },
-      safe: true,
-    },
-  }),
+  // parts.minifyCSS({
+  //   options: {
+  //     discardComments: {
+  //       removeAll: true,
+  //     },
+  //     safe: true,
+  //   },
+  // }),
   parts.extractCSS({
     use: [
       {
         loader: 'css-loader',
         options: {
           importLoaders: 2,
+          // modules: true // provides local scope for every module by making every class declared within unique by including a hash in their name that is globally unique to the module
           // sourceMap: true,
         },
       },
@@ -125,6 +127,10 @@ const productionConfig = merge([
   parts.purifyCSS({
     paths: glob.sync(`${APP_DIR}/**/*.js`, { nodir: true }),
   }),
+  /**
+   * Add an extra argument in parts.loadCSS() to accept a boolean value on whether the env is set to prod
+   * or dev and if it's in prod, perform the image optimizations
+   */
   parts.loadAndCompressImages({
     options: {
       limit: 15000,
@@ -143,10 +149,20 @@ const productionConfig = merge([
           },
         },
       },
+      runtimeChunk: {
+        name: 'manifest',
+      },
+      // splitChunks: {
+      //   chunks: 'initial',
+      // },
     },
   },
 ])
 
+/**
+ * If in dev mode to help fix HMR issue with creating new files with different hashes upon change, maybe implement an [id].name.[ext] etc,
+ * an example was found in a previous post
+ */
 const developmentConfig = merge([
   parts.devServer({
     host: process.env.HOST,

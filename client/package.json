@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "webpack --env production --config ./config/webpack.config.js",
+    "build:stats": "webpack --env production --config ./config/webpack.config.js --json > stats.json",
     "start": "nodemon --watch ./config/webpack.config.js --exec \"webpack-dev-server --env development --config ./config/webpack.config.js  --color\""
   },
   "dependencies": {

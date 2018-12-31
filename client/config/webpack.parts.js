@@ -113,6 +113,9 @@ exports.loadJavaScript = ({ include, exclude } = {}) => ({
   },
 })
 
+/**
+ * Research best optimization configuration for images using webpack
+ */
 exports.loadImages = ({ include, exclude, options } = {}) => ({
   module: {
     rules: [
@@ -178,6 +181,8 @@ exports.devServer = ({ host, port } = {}) => ({
     contentBase: configPaths.BUILD_DIR,
     compress: true,
     hot: true,
+    // hotOnly: true, // Don't refresh is loading fails. Good while implementing the client interface
+    // ^^ if you want to refresh on errors too, set hot: true
     historyApiFallback: true,
     stats: 'errors-only',
     host, // Defaults to `localhost`
