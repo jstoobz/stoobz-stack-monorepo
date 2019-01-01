@@ -6,6 +6,7 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const cssnano = require('cssnano')
 const UglifyWebpackPlugin = require('uglifyjs-webpack-plugin')
 const PurifyCSSPlugin = require('purifycss-webpack')
+const Visualizer = require('webpack-visualizer-plugin')
 
 const configPaths = require('./paths')
 
@@ -21,6 +22,11 @@ exports.clean = path => ({
   plugins: [new CleanWebpackPlugin([path], { allowExternal: true })],
 })
 
+// rename to bundleVisualizer?
+exports.webpackVisualizer = () => ({
+  plugins: [new Visualizer({ filename: './statistics.html' })],
+})
+
 exports.setFreeVariable = (key, value) => {
   const env = {}
   env[key] = JSON.stringify(value)
@@ -33,7 +39,12 @@ exports.setFreeVariable = (key, value) => {
 exports.autoprefix = () => ({
   loader: 'postcss-loader',
   options: {
-    plugins: () => [require('autoprefixer')()],
+    plugins: () => [
+      require('autoprefixer')(),
+      // require('cssnano')(),
+      // require('postcss-import')(),
+      // require('postcss-cssnext')(),
+    ],
     // sourceMap: true,
   },
 })
@@ -43,7 +54,7 @@ exports.minifyCSS = ({ options }) => ({
     new OptimizeCSSAssetsPlugin({
       cssProcessor: cssnano,
       cssProcessorOptions: options,
-      canPrint: false,
+      // canPrint: false, // is this needed?
     }),
   ],
 })
@@ -168,6 +179,7 @@ exports.loadAndCompressImages = ({ include, exclude, options } = {}) => ({
               webp: {
                 quality: 75,
               },
+              enforce: 'pre',
             },
           },
         ],
@@ -181,7 +193,7 @@ exports.devServer = ({ host, port } = {}) => ({
     contentBase: configPaths.BUILD_DIR,
     compress: true,
     hot: true,
-    // hotOnly: true, // Don't refresh is loading fails. Good while implementing the client interface
+    // hotOnly: true, // Don't refresh if loading fails. Good while implementing the client interface
     // ^^ if you want to refresh on errors too, set hot: true
     historyApiFallback: true,
     stats: 'errors-only',

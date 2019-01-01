@@ -31,7 +31,11 @@ const commonConfig = merge([
     resolve: {
       extensions: ['.js', '.jsx'],
     },
-    // devtool: 'source-map',
+    stats: {
+      assets: true,
+      assetsSort: 'field',
+      colors: true,
+    },
     module: {
       rules: [
         {
@@ -76,6 +80,7 @@ const commonConfig = merge([
   },
   parts.loadJavaScript({ exclude: /node_modules/ }),
   parts.setFreeVariable('HELLO', 'hello from config'),
+  // parts.webpackVisualizer(),
 ])
 
 // const commonConfig = merge([
@@ -133,7 +138,7 @@ const productionConfig = merge([
    */
   parts.loadAndCompressImages({
     options: {
-      limit: 15000,
+      limit: 10 * 1024,
       name: 'static/media/[name].[hash:8].[ext]',
     },
   }),
@@ -173,20 +178,25 @@ const developmentConfig = merge([
   parts.generateSourceMaps({ type: 'cheap-module-eval-source-map' }),
 ])
 
-module.exports = mode => {
+module.exports = env => {
   // console.log(`
 
   //   MODE: ${JSON.stringify(mode)}
 
   // `)
-  if (mode === 'production') {
+  if (env === 'production') {
     // console.log('\x1b[36m%s\x1b[0m', 'Building for production ...');
 
-    console.log(`MODE: ${JSON.stringify(mode)}`)
+    console.log(`
 
-    return merge(commonConfig, productionConfig, { mode })
+      env: ${JSON.stringify(env)}
+      babel_env: ${JSON.stringify(process.env.BABEL_ENV)}
+
+    `)
+
+    return merge(commonConfig, productionConfig, { mode: env })
   }
-  console.log(`MODE_SHOULDBEDEV: ${JSON.stringify(mode)}`)
+  console.log(`MODE_SHOULDBEDEV: ${JSON.stringify(env)}`)
 
-  return merge(commonConfig, developmentConfig, { mode })
+  return merge(commonConfig, developmentConfig, { mode: env })
 }

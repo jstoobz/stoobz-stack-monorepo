@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import logo from './logo.svg'
 import code from '../public/images/code.png'
+import background from '../public/images/background.jpg'
 import './App.scss'
 
 class App extends Component {
@@ -73,6 +74,9 @@ class App extends Component {
         <span>
           Font-Awesome is <i className="fa fa-thumbs-up" />
         </span>
+        <div className="test-background">
+          <img src={background} />
+        </div>
       </div>
     )
   }

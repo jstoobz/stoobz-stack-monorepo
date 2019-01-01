@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "webpack --env production --config ./config/webpack.config.js",
+    "build": "webpack --env production --config ./config/webpack.config.js --progress",
     "build:stats": "webpack --env production --config ./config/webpack.config.js --json > stats.json",
-    "start": "nodemon --watch ./config/webpack.config.js --exec \"webpack-dev-server --env development --config ./config/webpack.config.js  --color\""
+    "start": "webpack-dev-server --env development --config ./config/webpack.config.js",
+    "build_OLD": "webpack --env production --config ./config/webpack.config.js --progress",
+    "start_OLD": "nodemon --watch ./config/webpack.config.js --exec \"webpack-dev-server --env development --config ./config/webpack.config.js  --color\""
   },
   "dependencies": {
     "dotenv": "^6.2.0",

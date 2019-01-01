@@ -1,5 +1,5 @@
 {
-  "name": "stoobz-stack",
+  "name": "stoobz-stack-monorepo",
   "version": "1.0.0",
   "scripts": {
     "client": "cd client && npm run start",
